@@ -1,23 +1,143 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+  <q-layout view="hHh Lpr lFf">
+    <!-- HEADER -->
+    <q-header elevated class="bg-primary text-white">
       <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        <!-- Na mobile otvorí zoznam kanálov -->
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          class="lt-md"
+          @click="leftDrawerOpen = !leftDrawerOpen"
+        />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <q-toolbar-title>
+          VPWA Chat
+        </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <!-- Na menšej obrazovke otvorí členov -->
+        <q-btn
+          flat
+          dense
+          round
+          icon="group"
+          class="lt-lg"
+          @click="rightDrawerOpen = !rightDrawerOpen"
+        />
+
+        <div class="row items-center q-gutter-sm">
+          <q-badge color="positive">
+            online
+          </q-badge>
+
+          <span class="gt-xs">
+            Matus
+          </span>
+
+          <q-avatar
+            color="white"
+            text-color="primary"
+            size="34px"
+          >
+            MB
+          </q-avatar>
+        </div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+    <!-- CHANNELS -->
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      :width="230"
+      :breakpoint="700"
+      bordered
+      class="bg-grey-10 text-white"
+    >
+      <div class="q-pa-md text-subtitle1 text-weight-bold">
+        Channels
+      </div>
 
-        <EssentialLink v-for="link in linksList" :key="link.label" v-bind="link" />
+      <q-list>
+        <q-item
+          v-for="channel in channels"
+          :key="channel.name"
+          clickable
+          v-ripple
+          :active="channel.name === 'general'"
+          active-class="bg-grey-8 text-white"
+        >
+          <q-item-section avatar>
+            <q-icon
+              :name="channel.private ? 'lock' : 'tag'"
+              size="20px"
+            />
+          </q-item-section>
+
+          <q-item-section>
+            {{ channel.name }}
+          </q-item-section>
+
+          <q-item-section
+            v-if="channel.invited"
+            side
+          >
+            <q-badge color="orange">
+              NEW
+            </q-badge>
+          </q-item-section>
+        </q-item>
+
+        <q-separator dark class="q-my-sm" />
+
+        <q-item clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="add" />
+          </q-item-section>
+
+          <q-item-section>
+            Create channel
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
+    <!-- MEMBERS -->
+    <q-drawer
+      v-model="rightDrawerOpen"
+      side="right"
+      show-if-above
+      :width="210"
+      :breakpoint="1000"
+      bordered
+    >
+      <div class="q-pa-md text-subtitle1 text-weight-bold">
+        Members
+      </div>
+
+      <q-list>
+        <q-item
+          v-for="member in members"
+          :key="member.name"
+        >
+          <q-item-section avatar>
+            <q-icon
+              name="circle"
+              :color="member.online ? 'positive' : 'grey'"
+              size="10px"
+            />
+          </q-item-section>
+
+          <q-item-section>
+            {{ member.name }}
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+    <!-- OBSAH STRÁNKY -->
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -25,57 +145,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from '@/components/EssentialLink.vue';
+import { ref } from 'vue'
 
-const linksList: EssentialLinkProps[] = [
-  {
-    label: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    label: 'GitHub',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    label: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    label: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    label: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    label: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    label: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
-];
+const leftDrawerOpen = ref(false)
+const rightDrawerOpen = ref(false)
 
-const leftDrawerOpen = ref(false);
+const channels = [
+  {
+    name: 'general',
+    private: false,
+    invited: false,
+  },
+  {
+    name: 'vpwa',
+    private: false,
+    invited: true,
+  },
+  {
+    name: 'private-team',
+    private: true,
+    invited: false,
+  },
+]
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+const members = [
+  {
+    name: 'Jano',
+    online: true,
+  },
+  {
+    name: 'Anton',
+    online: true,
+  },
+  {
+    name: 'Stevo',
+    online: true,
+  }
+]
 </script>
