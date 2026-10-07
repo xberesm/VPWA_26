@@ -43,6 +43,14 @@
           >
             MB
           </q-avatar>
+
+          <q-btn
+            flat
+            dense
+            icon="logout"
+            label="Logout"
+            @click="logout"
+          />
         </div>
       </q-toolbar>
     </q-header>
@@ -146,9 +154,17 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const leftDrawerOpen = ref(false)
 const rightDrawerOpen = ref(false)
+
+const logout = () => {
+  localStorage.removeItem('loggedIn')
+  void router.push('/login')
+}
 
 const channels = [
   {
@@ -180,6 +196,6 @@ const members = [
   {
     name: 'Stevo',
     online: true,
-  }
+  },
 ]
 </script>
