@@ -7,6 +7,7 @@ import {
 } from 'vue-router';
 
 import routes from './routes';
+import { useAuthStore } from '@/stores/auth';
 
 export default defineRouter(() => {
   const createHistory = import.meta.env.QUASAR_SERVER
@@ -22,7 +23,7 @@ export default defineRouter(() => {
   });
 
   Router.beforeEach((to) => {
-    const loggedIn = localStorage.getItem('loggedIn') === 'true';
+    const loggedIn = useAuthStore().isLoggedIn;
 
     const publicPages = ['/login', '/register'];
 

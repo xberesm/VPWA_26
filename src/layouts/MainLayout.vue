@@ -33,7 +33,7 @@
           </q-badge>
 
           <span class="gt-xs">
-            Matus
+            {{ auth.user?.username }}
           </span>
 
           <q-avatar
@@ -41,7 +41,7 @@
             text-color="primary"
             size="34px"
           >
-            MB
+            {{ initials }}
           </q-avatar>
 
           <q-btn
@@ -70,11 +70,12 @@
 
       <q-list>
         <q-item
-          v-for="channel in channels"
-          :key="channel.name"
+          v-for="channel in messages.channels"
+          :key="channel.id"
           clickable
           v-ripple
-          :active="channel.name === 'general'"
+          :active="channel.id === messages.activeChannelId"
+          @click="messages.activeChannelId = channel.id"
           active-class="bg-grey-8 text-white"
         >
           <q-item-section avatar>
@@ -153,36 +154,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useMessagesStore } from '@/stores/messages'
 
 const router = useRouter()
+const auth = useAuthStore()
+const messages = useMessagesStore()
+
+onMounted(() => void messages.loadChannels())
+
+const initials = computed(() =>
+  (auth.user?.username ?? '').slice(0, 2).toUpperCase()
+)
 
 const leftDrawerOpen = ref(false)
 const rightDrawerOpen = ref(false)
 
 const logout = () => {
-  localStorage.removeItem('loggedIn')
+  auth.logout()
   void router.push('/login')
 }
-
-const channels = [
-  {
-    name: 'general',
-    private: false,
-    invited: false,
-  },
-  {
-    name: 'vpwa',
-    private: false,
-    invited: true,
-  },
-  {
-    name: 'private-team',
-    private: true,
-    invited: false,
-  },
-]
 
 const members = [
   {

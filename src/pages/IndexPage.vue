@@ -4,11 +4,11 @@
     <div class="row items-center justify-between q-pa-md">
       <div>
         <div class="text-h6">
-          # general
+          # {{ store.activeChannel?.name }}
         </div>
 
         <div class="text-caption text-grey-7">
-          General discussion
+          {{ store.activeChannel?.description }}
         </div>
       </div>
 
@@ -22,20 +22,33 @@
     <q-separator />
 
     <!-- mess -->
-    <div class="messages-area q-pa-md">
-      <div
-        v-for="message in messages"
-        :key="message.id"
-        :class="{ 'mentioned-message': message.mentioned }"
-        class="q-pa-xs rounded-borders"
+    <div ref="messagesArea" class="messages-area scroll-y q-pa-md">
+      <q-infinite-scroll
+        v-if="store.activeChannelId !== null"
+        :key="store.activeChannelId"
+        reverse
+        @load="onLoad"
       >
-        <q-chat-message
-          :name="message.author"
-          :text="[message.text]"
-          :stamp="message.time"
-          :sent="message.author === 'Jano'"
-        />
-      </div>
+        <template #loading>
+          <div class="row justify-center q-my-md">
+            <q-spinner color="primary" size="32px" />
+          </div>
+        </template>
+
+        <div
+          v-for="message in store.activeMessages"
+          :key="message.id"
+          :class="{ 'mentioned-message': isMentioned(message.text) }"
+          class="q-pa-xs rounded-borders"
+        >
+          <q-chat-message
+            :name="message.author"
+            :text="[message.text]"
+            :stamp="formatTime(message.createdAt)"
+            :sent="message.author === auth.user?.username"
+          />
+        </div>
+      </q-infinite-scroll>
 
       <div class="text-caption text-grey-7 q-mt-md">
         Ed is typing...
@@ -66,59 +79,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useMessagesStore } from '@/stores/messages'
+
+const auth = useAuthStore()
+const store = useMessagesStore()
 
 const messageText = ref('')
+const messagesArea = ref<HTMLElement>()
 
-const messages = ref([
-  {
-    id: 1,
-    author: 'Jano',
-    text: 'skuska',
-    time: new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    mentioned: false,
-  },
-  {
-    id: 2,
-    author: 'Stevo',
-    text: '123456',
-    time: '12:12',
-    mentioned: true,
-  },
-  {
-    id: 3,
-    author: 'Stevo',
-    text: 'Stevo',
-    time: new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    mentioned: false,
-  },
-])
+const formatTime = (iso: string) =>
+  new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
-function sendMessage() {
+const isMentioned = (text: string) =>
+  !!auth.user && text.includes(`@${auth.user.username}`)
+
+async function onLoad(_index: number, done: (stop?: boolean) => void) {
+  if (store.activeChannelId === null) return done(true)
+  done(await store.loadOlder(store.activeChannelId))
+}
+
+async function sendMessage() {
   const text = messageText.value.trim()
 
-  if (text === '') {
+  if (text === '' || store.activeChannelId === null || !auth.user) {
     return
   }
 
-  messages.value.push({
-    id: Date.now(),
-    author: 'Jano',
-    text: text,
-    time: new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    mentioned: false,
-  })
-
   messageText.value = ''
+  await store.send(store.activeChannelId, auth.user.username, text)
+
+  await nextTick()
+  messagesArea.value?.scrollTo({ top: messagesArea.value.scrollHeight })
 }
 </script>
 
