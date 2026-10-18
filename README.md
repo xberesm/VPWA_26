@@ -12,6 +12,32 @@ pnpm install
 ```bash
 quasar dev
 ```
+### Existing TEMP users 
+
+**FOR TESTING**
+
+```json
+{
+    id: 1,
+    username: 'Jano',
+    email: 'jano@test.sk',
+    password: 'heslo123',
+  },
+  {
+    id: 2,
+    username: 'Anton',
+    email: 'anton@test.sk',
+    password: 'heslo123',
+  },
+  {
+    id: 3,
+    username: 'Stevo',
+    email: 'stevo@test.sk',
+    password: 'heslo123',
+  },
+```
+temporary in local db -> will be recreated in sql table
+
 
 ### Format & Lint the files
 
