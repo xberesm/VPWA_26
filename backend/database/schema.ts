@@ -8,18 +8,7 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class AuthAccessTokenSchema extends BaseModel {
-  static $columns = [
-    'abilities',
-    'createdAt',
-    'expiresAt',
-    'hash',
-    'id',
-    'lastUsedAt',
-    'name',
-    'tokenableId',
-    'type',
-    'updatedAt',
-  ] as const
+  static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
   @column()
   declare abilities: string
@@ -59,12 +48,12 @@ export class ChannelBanSchema extends BaseModel {
 }
 
 export class ChannelKickVoteSchema extends BaseModel {
-  static $columns = ['createdAt', 'channelId', 'id', 'targetUserId', 'voterUserId'] as const
+  static $columns = ['channelId', 'createdAt', 'id', 'targetUserId', 'voterUserId'] as const
   $columns = ChannelKickVoteSchema.$columns
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
   @column()
   declare channelId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: number
   @column()
@@ -89,16 +78,7 @@ export class ChannelMemberSchema extends BaseModel {
 }
 
 export class ChannelSchema extends BaseModel {
-  static $columns = [
-    'createdAt',
-    'description',
-    'id',
-    'isPrivate',
-    'lastActivityAt',
-    'name',
-    'ownerId',
-    'updatedAt',
-  ] as const
+  static $columns = ['createdAt', 'description', 'id', 'isPrivate', 'lastActivityAt', 'name', 'ownerId', 'updatedAt'] as const
   $columns = ChannelSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -130,14 +110,14 @@ export class MessageMentionSchema extends BaseModel {
 }
 
 export class MessageSchema extends BaseModel {
-  static $columns = ['authorId', 'createdAt', 'channelId', 'id', 'text'] as const
+  static $columns = ['authorId', 'channelId', 'createdAt', 'id', 'text'] as const
   $columns = MessageSchema.$columns
   @column()
   declare authorId: number
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
   @column()
   declare channelId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: number
   @column()
@@ -145,17 +125,7 @@ export class MessageSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = [
-    'createdAt',
-    'email',
-    'firstName',
-    'fullName',
-    'id',
-    'lastName',
-    'nickname',
-    'password',
-    'updatedAt',
-  ] as const
+  static $columns = ['createdAt', 'email', 'firstName', 'fullName', 'id', 'lastName', 'nickname', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

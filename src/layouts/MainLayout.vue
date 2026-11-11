@@ -12,7 +12,9 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title> VPWA Chat </q-toolbar-title>
+        <q-toolbar-title>
+          <span class="gt-xs">VPWA Chat</span>
+        </q-toolbar-title>
 
         <q-btn
           flat
@@ -29,7 +31,8 @@
             flat
             dense
             no-caps
-            :label="statusLabel(presence.status)"
+            :label="$q.screen.xs ? undefined : statusLabel(presence.status)"
+            :icon="$q.screen.xs ? 'circle' : undefined"
             :color="statusColor(presence.status)"
             dropdown-icon="arrow_drop_down"
           >
@@ -80,7 +83,14 @@
             {{ initials }}
           </q-avatar>
 
-          <q-btn flat dense icon="logout" label="Logout" @click="logout" />
+          <q-btn
+            flat
+            dense
+            icon="logout"
+            :label="$q.screen.xs ? undefined : 'Logout'"
+            aria-label="Logout"
+            @click="logout"
+          />
         </div>
       </q-toolbar>
     </q-header>
