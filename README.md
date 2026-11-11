@@ -12,7 +12,8 @@ pnpm install
 ```bash
 quasar dev
 ```
-### Existing TEMP users 
+
+### Existing TEMP users
 
 **FOR TESTING**
 
@@ -36,8 +37,8 @@ quasar dev
     password: 'heslo123',
   },
 ```
-temporary in local db -> will be recreated in sql table
 
+temporary in local db -> will be recreated in sql table
 
 ### Format & Lint the files
 

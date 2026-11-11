@@ -1,9 +1,4 @@
-
-import type {
-  Channel,
-  Message,
-  User,
-} from '@/api';
+import type { Channel, Message, User } from '@/api';
 
 // Temporary in-memory database.
 // Data is reset when the page is refreshed.
@@ -87,29 +82,20 @@ const seed: [number, string, string][] = [
   [2, 'Stevo', 'Do piatku'],
   [3, 'Jano', 'Toto je sukromny kanal'],
 
-  ...Array.from(
-    { length: 60 },
-    (_, i): [number, string, string] => [
-      1,
-      ['Jano', 'Anton', 'Stevo'][i % 3] as string,
-      i === 58
-        ? '@Jano pozri sa na to'
-        : `Sprava cislo ${i + 1}`,
-    ],
-  ),
+  ...Array.from({ length: 60 }, (_, i): [number, string, string] => [
+    1,
+    ['Jano', 'Anton', 'Stevo'][i % 3] as string,
+    i === 58 ? '@Jano pozri sa na to' : `Sprava cislo ${i + 1}`,
+  ]),
 ];
 
-const messages: Message[] = seed.map(
-  ([channelId, author, text], i) => ({
-    id: i + 1,
-    channelId,
-    author,
-    text,
-    createdAt: new Date(
-      Date.now() - (seed.length - i) * 60_000,
-    ).toISOString(),
-  }),
-);
+const messages: Message[] = seed.map(([channelId, author, text], i) => ({
+  id: i + 1,
+  channelId,
+  author,
+  text,
+  createdAt: new Date(Date.now() - (seed.length - i) * 60_000).toISOString(),
+}));
 
 export const db = {
   users,
