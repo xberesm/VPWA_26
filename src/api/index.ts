@@ -1,4 +1,3 @@
-
 import { db } from '@/db/localDb';
 
 // Prototype API - local database, no backend yet.
@@ -47,11 +46,9 @@ export interface ActionResult {
   message: string;
 }
 
-const delay = () =>
-  new Promise<void>((resolve) => setTimeout(resolve, 150));
+const delay = () => new Promise<void>((resolve) => setTimeout(resolve, 150));
 
-const norm = (name: string) =>
-  name.trim().replace(/^#/, '').toLowerCase();
+const norm = (name: string) => name.trim().replace(/^#/, '').toLowerCase();
 
 const getUser = (id: number) => {
   const user = db.users.find((u) => u.id === id);
@@ -61,9 +58,7 @@ const getUser = (id: number) => {
 
 const getByNickname = (nickname: string) => {
   const user = db.users.find(
-    (u) =>
-      u.username.toLowerCase() ===
-      nickname.trim().replace(/^@/, '').toLowerCase(),
+    (u) => u.username.toLowerCase() === nickname.trim().replace(/^@/, '').toLowerCase(),
   );
   if (!user) throw new Error(`User ${nickname} does not exist.`);
   return user;
@@ -106,10 +101,7 @@ function clearInactiveChannels() {
   for (let index = db.channels.length - 1; index >= 0; index--) {
     const channel = db.channels[index];
 
-    if (
-      channel &&
-      new Date(channel.lastActivityAt).getTime() < limit
-    ) {
+    if (channel && new Date(channel.lastActivityAt).getTime() < limit) {
       db.channels.splice(index, 1);
     }
   }
@@ -117,16 +109,11 @@ function clearInactiveChannels() {
 
 // Authentication
 
-export async function login(
-  email: string,
-  password: string,
-): Promise<User> {
+export async function login(email: string, password: string): Promise<User> {
   await delay();
 
   const found = db.users.find(
-    (u) =>
-      u.email === email.trim().toLowerCase() &&
-      u.password === password,
+    (u) => u.email === email.trim().toLowerCase() && u.password === password,
   );
 
   if (!found) throw new Error('Invalid email or password');
@@ -138,11 +125,7 @@ export async function login(
   };
 }
 
-export async function register(
-  username: string,
-  email: string,
-  password: string,
-): Promise<User> {
+export async function register(username: string, email: string, password: string): Promise<User> {
   await delay();
 
   const newUser = {
@@ -156,13 +139,7 @@ export async function register(
     throw new Error('An account with this email already exists');
   }
 
-  if (
-    db.users.some(
-      (u) =>
-        u.username.toLowerCase() ===
-        newUser.username.toLowerCase(),
-    )
-  ) {
+  if (db.users.some((u) => u.username.toLowerCase() === newUser.username.toLowerCase())) {
     throw new Error('This username is already taken');
   }
 
@@ -177,9 +154,7 @@ export async function register(
 
 // Channel listing
 
-export async function getChannels(
-  userId: number,
-): Promise<Channel[]> {
+export async function getChannels(userId: number): Promise<Channel[]> {
   await delay();
   getUser(userId);
   clearInactiveChannels();
@@ -188,29 +163,21 @@ export async function getChannels(
     .filter((c) => c.memberIds.includes(userId))
     .sort(
       (a, b) =>
-        Number(b.invitedUserIds.includes(userId)) -
-        Number(a.invitedUserIds.includes(userId)),
+        Number(b.invitedUserIds.includes(userId)) - Number(a.invitedUserIds.includes(userId)),
     )
     .map(snapshot);
 }
 
-export async function openChannel(
-  channelId: number,
-  userId: number,
-): Promise<void> {
+export async function openChannel(channelId: number, userId: number): Promise<void> {
   await delay();
 
   const channel = getChannel(channelId);
   requireMember(channel, userId);
 
-  channel.invitedUserIds =
-    channel.invitedUserIds.filter((id) => id !== userId);
+  channel.invitedUserIds = channel.invitedUserIds.filter((id) => id !== userId);
 }
 
-export async function getChannelMembers(
-  channelId: number,
-  userId: number,
-): Promise<Member[]> {
+export async function getChannelMembers(channelId: number, userId: number): Promise<Member[]> {
   await delay();
 
   const channel = getChannel(channelId);
@@ -227,19 +194,12 @@ export async function getChannelMembers(
   });
 }
 
-export async function getPublicChannels(
-  userId: number,
-): Promise<Channel[]> {
+export async function getPublicChannels(userId: number): Promise<Channel[]> {
   await delay();
   clearInactiveChannels();
 
   return db.channels
-    .filter(
-      (c) =>
-        !c.private &&
-        !c.memberIds.includes(userId) &&
-        !c.bannedUserIds.includes(userId),
-    )
+    .filter((c) => !c.private && !c.memberIds.includes(userId) && !c.bannedUserIds.includes(userId))
     .map(snapshot);
 }
 
@@ -253,11 +213,7 @@ export async function getMessages(
   await delay();
 
   return db.messages
-    .filter(
-      (m) =>
-        m.channelId === channelId &&
-        (beforeId === undefined || m.id < beforeId),
-    )
+    .filter((m) => m.channelId === channelId && (beforeId === undefined || m.id < beforeId))
     .slice(-limit);
 }
 
@@ -303,19 +259,11 @@ export async function createChannel(
   const channelName = name.trim().replace(/^#/, '');
 
   if (!/^[a-zA-Z0-9_-]{2,30}$/.test(channelName)) {
-    throw new Error(
-      'Channel name must contain 2–30 letters, numbers, _ or -',
-    );
+    throw new Error('Channel name must contain 2–30 letters, numbers, _ or -');
   }
 
-  if (
-    db.channels.some(
-      (c) => norm(c.name) === norm(channelName),
-    )
-  ) {
-    throw new Error(
-      'Channel already exists. Use /join to enter a public channel.',
-    );
+  if (db.channels.some((c) => norm(c.name) === norm(channelName))) {
+    throw new Error('Channel already exists. Use /join to enter a public channel.');
   }
 
   const now = new Date().toISOString();
@@ -354,22 +302,13 @@ export async function joinChannel(
   const nameKey = norm(name);
 
   if (!/^[a-z0-9_-]{2,30}$/.test(nameKey)) {
-    throw new Error(
-      'Usage: /join channelName [private] (2–30 characters).',
-    );
+    throw new Error('Usage: /join channelName [private] (2–30 characters).');
   }
 
-  const existing = db.channels.find(
-    (c) => norm(c.name) === nameKey,
-  );
+  const existing = db.channels.find((c) => norm(c.name) === nameKey);
 
   if (!existing) {
-    const created = await createChannel(
-      name,
-      '',
-      isPrivate,
-      userId,
-    );
+    const created = await createChannel(name, '', isPrivate, userId);
 
     return {
       message: `Channel #${created.name} created (${isPrivate ? 'private' : 'public'}).`,
@@ -387,15 +326,11 @@ export async function joinChannel(
   }
 
   if (existing.private) {
-    throw new Error(
-      'Private channel: ask the owner for an invitation.',
-    );
+    throw new Error('Private channel: ask the owner for an invitation.');
   }
 
   if (isPrivate) {
-    throw new Error(
-      'This channel already exists as a public channel.',
-    );
+    throw new Error('This channel already exists as a public channel.');
   }
 
   existing.memberIds.push(userId);
@@ -427,26 +362,16 @@ export async function inviteUser(
 
   if (channel.bannedUserIds.includes(invited.id)) {
     if (channel.ownerId !== actorId) {
-      throw new Error(
-        'Only the owner can lift a channel ban.',
-      );
+      throw new Error('Only the owner can lift a channel ban.');
     }
 
-    channel.bannedUserIds =
-      channel.bannedUserIds.filter(
-        (id) => id !== invited.id,
-      );
+    channel.bannedUserIds = channel.bannedUserIds.filter((id) => id !== invited.id);
 
-    channel.kickVotes =
-      channel.kickVotes.filter(
-        (vote) => vote.targetId !== invited.id,
-      );
+    channel.kickVotes = channel.kickVotes.filter((vote) => vote.targetId !== invited.id);
   }
 
   if (channel.memberIds.includes(invited.id)) {
-    throw new Error(
-      `${invited.username} is already a member.`,
-    );
+    throw new Error(`${invited.username} is already a member.`);
   }
 
   channel.memberIds.push(invited.id);
@@ -472,9 +397,7 @@ export async function revokeUser(
   const channel = getChannel(channelId);
 
   if (!channel.private) {
-    throw new Error(
-      '/revoke is only available in private channels.',
-    );
+    throw new Error('/revoke is only available in private channels.');
   }
 
   requireOwner(channel, actorId);
@@ -482,26 +405,16 @@ export async function revokeUser(
   const target = getByNickname(nickname);
 
   if (target.id === actorId) {
-    throw new Error(
-      'Use /cancel if you want to close your own channel.',
-    );
+    throw new Error('Use /cancel if you want to close your own channel.');
   }
 
   if (!channel.memberIds.includes(target.id)) {
-    throw new Error(
-      `${target.username} is not a member.`,
-    );
+    throw new Error(`${target.username} is not a member.`);
   }
 
-  channel.memberIds =
-    channel.memberIds.filter(
-      (id) => id !== target.id,
-    );
+  channel.memberIds = channel.memberIds.filter((id) => id !== target.id);
 
-  channel.invitedUserIds =
-    channel.invitedUserIds.filter(
-      (id) => id !== target.id,
-    );
+  channel.invitedUserIds = channel.invitedUserIds.filter((id) => id !== target.id);
 
   return {
     message: `${target.username} removed from #${channel.name}.`,
@@ -535,48 +448,28 @@ export async function kickUser(
   }
 
   if (channel.bannedUserIds.includes(target.id)) {
-    throw new Error(
-      `${target.username} is already banned.`,
-    );
+    throw new Error(`${target.username} is already banned.`);
   }
 
-  let votes = channel.kickVotes.find(
-    (vote) => vote.targetId === target.id,
-  );
+  let votes = channel.kickVotes.find((vote) => vote.targetId === target.id);
 
   if (votes?.voterIds.includes(actorId)) {
-    throw new Error(
-      'You have already used /kick against this user.',
-    );
+    throw new Error('You have already used /kick against this user.');
   }
 
-  if (
-    !channel.memberIds.includes(target.id) &&
-    !votes
-  ) {
-    throw new Error(
-      `${target.username} is not a member.`,
-    );
+  if (!channel.memberIds.includes(target.id) && !votes) {
+    throw new Error(`${target.username} is not a member.`);
   }
 
   // Channel owner can ban instantly.
   if (channel.ownerId === actorId) {
     channel.bannedUserIds.push(target.id);
 
-    channel.kickVotes =
-      channel.kickVotes.filter(
-        (vote) => vote.targetId !== target.id,
-      );
+    channel.kickVotes = channel.kickVotes.filter((vote) => vote.targetId !== target.id);
 
-    channel.memberIds =
-      channel.memberIds.filter(
-        (id) => id !== target.id,
-      );
+    channel.memberIds = channel.memberIds.filter((id) => id !== target.id);
 
-    channel.invitedUserIds =
-      channel.invitedUserIds.filter(
-        (id) => id !== target.id,
-      );
+    channel.invitedUserIds = channel.invitedUserIds.filter((id) => id !== target.id);
 
     return {
       message: `${target.username} permanently banned by the owner.`,
@@ -595,15 +488,9 @@ export async function kickUser(
 
   votes.voterIds.push(actorId);
 
-  channel.memberIds =
-    channel.memberIds.filter(
-      (id) => id !== target.id,
-    );
+  channel.memberIds = channel.memberIds.filter((id) => id !== target.id);
 
-  channel.invitedUserIds =
-    channel.invitedUserIds.filter(
-      (id) => id !== target.id,
-    );
+  channel.invitedUserIds = channel.invitedUserIds.filter((id) => id !== target.id);
 
   if (votes.voterIds.length >= 3) {
     channel.bannedUserIds.push(target.id);
@@ -620,35 +507,23 @@ export async function kickUser(
 
 // /cancel - leave the channel
 
-export async function leaveChannel(
-  channelId: number,
-  actorId: number,
-): Promise<ActionResult> {
+export async function leaveChannel(channelId: number, actorId: number): Promise<ActionResult> {
   await delay();
 
   const channel = getChannel(channelId);
   requireMember(channel, actorId);
 
   if (channel.ownerId === actorId) {
-    db.channels.splice(
-      db.channels.indexOf(channel),
-      1,
-    );
+    db.channels.splice(db.channels.indexOf(channel), 1);
 
     return {
       message: `You were the owner; #${channel.name} has been deleted.`,
     };
   }
 
-  channel.memberIds =
-    channel.memberIds.filter(
-      (id) => id !== actorId,
-    );
+  channel.memberIds = channel.memberIds.filter((id) => id !== actorId);
 
-  channel.invitedUserIds =
-    channel.invitedUserIds.filter(
-      (id) => id !== actorId,
-    );
+  channel.invitedUserIds = channel.invitedUserIds.filter((id) => id !== actorId);
 
   return {
     message: `You left #${channel.name}.`,
@@ -657,19 +532,13 @@ export async function leaveChannel(
 
 // /quit - owner closes the channel
 
-export async function closeChannel(
-  channelId: number,
-  actorId: number,
-): Promise<ActionResult> {
+export async function closeChannel(channelId: number, actorId: number): Promise<ActionResult> {
   await delay();
 
   const channel = getChannel(channelId);
   requireOwner(channel, actorId);
 
-  db.channels.splice(
-    db.channels.indexOf(channel),
-    1,
-  );
+  db.channels.splice(db.channels.indexOf(channel), 1);
 
   return {
     message: `#${channel.name} was permanently closed.`,

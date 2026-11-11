@@ -7,12 +7,7 @@
 
       <q-card-section>
         <q-form class="q-gutter-md" @submit="login">
-          <q-banner
-            v-if="error"
-            dense
-            rounded
-            class="bg-negative text-white"
-          >
+          <q-banner v-if="error" dense rounded class="bg-negative text-white">
             {{ error }}
           </q-banner>
 
@@ -34,12 +29,7 @@
             :rules="[required]"
           />
 
-          <q-btn
-            label="Login"
-            type="submit"
-            color="primary"
-            class="full-width"
-          />
+          <q-btn label="Login" type="submit" color="primary" class="full-width" />
 
           <div class="text-center">
             Don't have an account?
@@ -52,28 +42,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
-const email = ref('')
-const password = ref('')
-const error = ref('')
+const email = ref('');
+const password = ref('');
+const error = ref('');
 
-const router = useRouter()
-const auth = useAuthStore()
+const router = useRouter();
+const auth = useAuthStore();
 
-const required = (val: string) => !!val || 'This field is required'
-const validEmail = (val: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'Enter a valid email'
+const required = (val: string) => !!val || 'This field is required';
+const validEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'Enter a valid email';
 
 const login = async () => {
-  error.value = ''
+  error.value = '';
   try {
-    await auth.login(email.value, password.value)
-    void router.push('/')
+    await auth.loginOnServer(email.value.trim().toLowerCase(), password.value);
+    void router.push('/');
   } catch (e) {
-    error.value = (e as Error).message
+    error.value = (e as Error).message;
   }
-}
+};
 </script>
